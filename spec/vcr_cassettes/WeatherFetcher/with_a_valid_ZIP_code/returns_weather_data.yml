@@ -1,0 +1,38 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: https://nominatim.openstreetmap.org/search?accept-language=en&addressdetails=1&format=json&q=90210
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Server:
+      - nginx
+      Date:
+      - Wed, 23 Apr 2025 21:50:48 GMT
+      Content-Type:
+      - application/json; charset=utf-8
+      Content-Length:
+      - '1180'
+      Connection:
+      - keep-alive
+      Keep-Alive:
+      - timeout=20
+    body:
+      encoding: ASCII-8BIT
+      string: !binary |-
+        W3sicGxhY2VfaWQiOjM1MzY2MDgyMiwibGljZW5jZSI6IkRhdGEgwqkgT3BlblN0cmVldE1hcCBjb250cmlidXRvcnMsIE9EYkwgMS4wLiBodHRwOi8vb3NtLm9yZy9jb3B5cmlnaHQiLCJsYXQiOiIzNC4wOTQyNjI5IiwibG9uIjoiLTExOC40MTE0MzIwIiwiY2xhc3MiOiJwbGFjZSIsInR5cGUiOiJwb3N0Y29kZSIsInBsYWNlX3JhbmsiOjIxLCJpbXBvcnRhbmNlIjowLjEyMDAwOTk5OTk5OTk5OTk1LCJhZGRyZXNzdHlwZSI6InBvc3Rjb2RlIiwibmFtZSI6IjkwMjEwIiwiZGlzcGxheV9uYW1lIjoiOTAyMTAsIExvcyBBbmdlbGVzLCBMb3MgQW5nZWxlcyBDb3VudHksIENhbGlmb3JuaWEsIFVuaXRlZCBTdGF0ZXMiLCJhZGRyZXNzIjp7InBvc3Rjb2RlIjoiOTAyMTAiLCJjaXR5IjoiTG9zIEFuZ2VsZXMiLCJjb3VudHkiOiJMb3MgQW5nZWxlcyBDb3VudHkiLCJzdGF0ZSI6IkNhbGlmb3JuaWEiLCJJU08zMTY2LTItbHZsNCI6IlVTLUNBIiwiY291bnRyeSI6IlVuaXRlZCBTdGF0ZXMiLCJjb3VudHJ5X2NvZGUiOiJ1cyJ9LCJib3VuZGluZ2JveCI6WyIzNC4wNDQyNjI5IiwiMzQuMTQ0MjYyOSIsIi0xMTguNDYxNDMyMCIsIi0xMTguMzYxNDMyMCJdfSx7InBsYWNlX2lkIjozNTM2MjgzNjYsImxpY2VuY2UiOiJEYXRhIMKpIE9wZW5TdHJlZXRNYXAgY29udHJpYnV0b3JzLCBPRGJMIDEuMC4gaHR0cDovL29zbS5vcmcvY29weXJpZ2h0IiwibGF0IjoiNDguMzU3MTcxNCIsImxvbiI6IjIyLjM2Nzk2MjIiLCJjbGFzcyI6InBsYWNlIiwidHlwZSI6InBvc3Rjb2RlIiwicGxhY2VfcmFuayI6MjEsImltcG9ydGFuY2UiOjAuMTIwMDA5OTk5OTk5OTk5OTUsImFkZHJlc3N0eXBlIjoicG9zdGNvZGUiLCJuYW1lIjoiOTAyMTAiLCJkaXNwbGF5X25hbWUiOiI5MDIxMCwgU3ZvYm9kYSwgQmF0b3ZvIFNldHRsZW1lbnQgSHJvbWFkYSwgQmVyZWhvdmUgUmFpb24sIFVrcmFpbmUiLCJhZGRyZXNzIjp7InBvc3Rjb2RlIjoiOTAyMTAiLCJ2aWxsYWdlIjoiU3ZvYm9kYSIsIm11bmljaXBhbGl0eSI6IkJhdG92byBTZXR0bGVtZW50IEhyb21hZGEiLCJkaXN0cmljdCI6IkJlcmVob3ZlIFJhaW9uIiwiY291bnRyeSI6IlVrcmFpbmUiLCJjb3VudHJ5X2NvZGUiOiJ1YSJ9LCJib3VuZGluZ2JveCI6WyI0OC4zMDcxNzE0IiwiNDguNDA3MTcxNCIsIjIyLjMxNzk2MjIiLCIyMi40MTc5NjIyIl19XQ==
+  recorded_at: Wed, 23 Apr 2025 21:50:46 GMT
+recorded_with: VCR 6.3.1
