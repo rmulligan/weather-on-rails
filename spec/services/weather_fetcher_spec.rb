@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe WeatherFetcher, type: :service do
@@ -13,7 +15,7 @@ RSpec.describe WeatherFetcher, type: :service do
       expect(result[:current][:low]).to be_a(Numeric)
       expect(result[:forecast]).to be_an(Array)
       expect(result[:forecast].size).to be >= 1
-      expect(result[:provider]).to be_in(['OpenWeatherMap', 'VisualCrossing'])
+      expect(result[:provider]).to be_in(%w[OpenWeatherMap VisualCrossing])
     end
   end
 
@@ -25,7 +27,7 @@ RSpec.describe WeatherFetcher, type: :service do
       expect(result[:current][:low]).to be_a(Numeric)
       expect(result[:forecast]).to be_an(Array)
       expect(result[:forecast].size).to be >= 1
-      expect(result[:provider]).to be_in(['OpenWeatherMap', 'VisualCrossing'])
+      expect(result[:provider]).to be_in(%w[OpenWeatherMap VisualCrossing])
     end
   end
 
@@ -33,6 +35,22 @@ RSpec.describe WeatherFetcher, type: :service do
     it 'returns an error' do
       result = WeatherFetcher.call(invalid_location)
       expect(result[:error]).to be_present
+    end
+  end
+
+  context 'in test environment stubs', without_http: true do
+    before do
+      # stub geocoding so test env stub branch can run
+      fake_geo = double('geo', latitude: 0.0, longitude: 0.0, data: {})
+      allow(Geocoder).to receive(:search).and_return([fake_geo])
+    end
+
+    it 'returns stubbed weather data' do
+      result = WeatherFetcher.call('any')
+      expect(result[:current][:temp]).to eq(0.0)
+      expect(result[:forecast]).to be_an(Array)
+      expect(result[:provider]).to eq('OpenWeatherMap')
+      expect([true, false]).to include(result[:cached])
     end
   end
 end

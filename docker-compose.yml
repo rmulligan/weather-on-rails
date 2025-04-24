@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    # Start the Rails server (no migrations required since ActiveRecord is disabled)
+    command: bundle exec rails server -b 0.0.0.0
+    ports:
+      - "3000:3000"
+    environment:
+      OPENWEATHERMAP_API_KEY: ${OPENWEATHERMAP_API_KEY}
+      VISUALCROSSING_API_KEY: ${VISUALCROSSING_API_KEY}
+    volumes:
+      - .:/app:cached
+      - bundle:/usr/local/bundle
+
+volumes:
+  bundle:
+    labels:
+      description: "Gem cache volume"
