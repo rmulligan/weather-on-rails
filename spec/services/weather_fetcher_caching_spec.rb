@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe WeatherFetcher, type: :service do
@@ -8,11 +10,16 @@ RSpec.describe WeatherFetcher, type: :service do
       # Clear cache before tests
       Rails.cache.clear
       # Stub geocoding to avoid external calls
-      fake_geo = double('geo', latitude: 10.0, longitude: 20.0, data: { 'address' => { 'city' => 'Foo', 'state' => 'Bar', 'postcode' => location } })
+      fake_geo = double('geo', latitude: 10.0, longitude: 20.0,
+                               data: { 'address' => { 'city' => 'Foo', 'state' => 'Bar', 'postcode' => location } })
       allow(Geocoder).to receive(:search).with(location).and_return([fake_geo])
       # Stub API calls
       allow_any_instance_of(WeatherFetcher).to receive(:fetch_openweathermap)
-        .and_return(provider: 'Test', current: { temp: 1, high: 2, low: 0, summary: 'cold' }, forecast: [{ date: Date.today, high: 2, low: 0, summary: 'cold' }])
+        .and_return(
+          provider: 'Test',
+          current: { temp: 1, high: 2, low: 0, summary: 'cold' },
+          forecast: [{ date: Date.today, high: 2, low: 0, summary: 'cold' }]
+        )
       allow_any_instance_of(WeatherFetcher).to receive(:fetch_visualcrossing).and_return(nil)
     end
 
