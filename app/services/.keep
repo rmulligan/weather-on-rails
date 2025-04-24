@@ -1,0 +1,3 @@
+# This directory is created to follow Rails conventions for service objects.
+# Service objects are used to encapsulate business logic and are typically placed in the app/services directory.
+# You can add your service classes here.

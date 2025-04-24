@@ -1,0 +1,46 @@
+<h1 class="text-3xl font-bold mb-6">Weather Lookup</h1>
+
+<%= form_with url: weather_path, method: :get, local: true, class: "mb-8 flex flex-col md:flex-row gap-4 items-center" do |form| %>
+  <div class="flex flex-col md:flex-row gap-2 items-center w-full md:w-auto">
+    <%= form.label :location, 'Enter US address or ZIP code:', class: "font-semibold" %>
+    <%= form.text_field :location, value: params[:location], class: "border rounded px-2 py-1 w-64" %>
+    <%= form.submit 'Get Weather', class: "bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition" %>
+  </div>
+<% end %>
+
+<% if @location.present? %>
+  <% if @weather && @weather[:error].blank? %>
+    <div class="bg-white rounded shadow p-6 mb-6">
+      <h2 class="text-xl font-semibold mb-2">Weather for <%= @location %></h2>
+      <p><strong>Provider:</strong> <%= @weather[:provider] %></p>
+      <p><strong>Current Temp:</strong> <%= @weather[:current][:temp] %> °F</p>
+      <p><strong>High:</strong> <%= @weather[:current][:high] %> °F</p>
+      <p><strong>Low:</strong> <%= @weather[:current][:low] %> °F</p>
+      <p><strong>Summary:</strong> <%= @weather[:current][:summary] %></p>
+      <h3 class="mt-4 font-semibold">Forecast</h3>
+      <ul class="list-disc ml-6">
+        <% @weather[:forecast].each do |day| %>
+          <li>
+            <%= day[:date] %>: High <%= day[:high] %> °F, Low <%= day[:low] %> °F, <%= day[:summary] %>
+          </li>
+        <% end %>
+      </ul>
+      <%# Map rendering %>
+      <% if @weather[:lat] && @weather[:lon] %>
+        <div id="weather-map" class="mt-6 rounded shadow" style="height: 300px;"></div>
+        <script>
+          document.addEventListener('DOMContentLoaded', function() {
+            var map = L.map('weather-map').setView([<%= @weather[:lat] %>, <%= @weather[:lon] %>], 11);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+              maxZoom: 19,
+              attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            L.marker([<%= @weather[:lat] %>, <%= @weather[:lon] %>]).addTo(map);
+          });
+        </script>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="text-red-600 font-semibold"><%= @weather[:error] || 'Weather data unavailable.' %></p>
+  <% end %>
+<% end %>

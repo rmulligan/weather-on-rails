@@ -12,7 +12,7 @@ require "action_mailer/railtie"
 # require "action_text/engine"
 require "action_view/railtie"
 # require "action_cable/engine"
-# require "sprockets/railtie"
+require "sprockets/railtie"  # enable asset pipeline for TailwindCSS
 # require "rails/test_unit/railtie"
 
 # Require the gems listed in Gemfile, including any gems
