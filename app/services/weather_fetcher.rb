@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 # :nocov:
 
 # WeatherFetcher fetches weather data for a given US address or ZIP code.
@@ -12,8 +13,8 @@ class WeatherFetcher
   require 'geocoder'
   require 'httparty'
 
-  OPENWEATHERMAP_URL = "https://api.openweathermap.org/data/2.5/onecall"
-  VISUALCROSSING_URL = "https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline"
+  OPENWEATHERMAP_URL = 'https://api.openweathermap.org/data/2.5/onecall'
+  VISUALCROSSING_URL = 'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline'
 
   def self.call(location)
     new(location).fetch
@@ -23,16 +24,18 @@ class WeatherFetcher
   def fetch_us_zip(zip)
     resp = HTTParty.get("http://api.zippopotam.us/us/#{zip}")
     return nil unless resp.success?
+
     data = resp.parsed_response
     place = data['places']&.first
     return nil unless place
+
     lat = place['latitude'].to_f
     lon = place['longitude'].to_f
     city = place['place name']
     state = place['state abbreviation']
     place_name = [city, state, zip].join(', ')
     [lat, lon, place_name]
-  rescue
+  rescue StandardError
     nil
   end
 
@@ -51,11 +54,13 @@ class WeatherFetcher
         # US ZIP code: use Zippopotam.us for reliable US postal geocoding
         zip_data = fetch_us_zip(normalized)
         raise "Could not geocode US ZIP code #{normalized}" unless zip_data
+
         lat, lon, place_name = zip_data
       else
         # Geocode arbitrary address
         results = Geocoder.search(normalized)
-        raise "Could not geocode location" if results.empty?
+        raise 'Could not geocode location' if results.empty?
+
         first = results.first
         lat = first.latitude
         lon = first.longitude
@@ -75,10 +80,11 @@ class WeatherFetcher
         data = {
           provider: 'OpenWeatherMap',
           current: { temp: 0.0, high: 0.0, low: 0.0, summary: '' },
-          forecast: [ { date: Date.today, high: 0.0, low: 0.0, summary: '' } ]
+          forecast: [{ date: Date.today, high: 0.0, low: 0.0, summary: '' }]
         }
       else
-        data = fetch_openweathermap([lat, lon]) || fetch_visualcrossing([lat, lon]) || { error: "Weather data unavailable" }
+        data = fetch_openweathermap([lat,
+                                     lon]) || fetch_visualcrossing([lat, lon]) || { error: 'Weather data unavailable' }
       end
       data[:lat] = lat
       data[:lon] = lon
@@ -93,7 +99,7 @@ class WeatherFetcher
     # If fetched_at missing (e.g., migrated cache), set to now
     result[:fetched_at] ||= Time.current
     result
-  rescue => e
+  rescue StandardError => e
     { error: e.message }
   end
 
@@ -102,6 +108,7 @@ class WeatherFetcher
   def geocode(location)
     results = Geocoder.search(location)
     return nil if results.empty?
+
     lat = results.first.latitude
     lon = results.first.longitude
     [lat, lon]
@@ -111,11 +118,13 @@ class WeatherFetcher
     # Allow API key from credentials or ENV for development convenience
     api_key = Rails.application.credentials.openweathermap_api_key || ENV['OPENWEATHERMAP_API_KEY']
     return nil unless api_key
+
     lat, lon = coords
     resp = HTTParty.get(OPENWEATHERMAP_URL, query: {
-      lat: lat, lon: lon, units: 'imperial', appid: api_key, exclude: 'minutely,alerts'
-    })
+                          lat: lat, lon: lon, units: 'imperial', appid: api_key, exclude: 'minutely,alerts'
+                        })
     return nil unless resp.success?
+
     parse_openweathermap(resp.parsed_response)
   rescue HTTParty::Error, JSON::ParserError => e
     Rails.logger.error("Error fetching data from OpenWeatherMap: #{e.message}")
@@ -125,14 +134,16 @@ class WeatherFetcher
     # Allow API key from credentials or ENV for development convenience
     api_key = Rails.application.credentials.visualcrossing_api_key || ENV['VISUALCROSSING_API_KEY']
     return nil unless api_key
+
     lat, lon = coords
     url = "#{VISUALCROSSING_URL}/#{lat},#{lon}"
     resp = HTTParty.get(url, query: {
-      unitGroup: 'us', key: api_key, include: 'days,current', contentType: 'json'
-    })
+                          unitGroup: 'us', key: api_key, include: 'days,current', contentType: 'json'
+                        })
     return nil unless resp.success?
+
     parse_visualcrossing(resp.parsed_response)
-  rescue
+  rescue StandardError
     nil
   end
 

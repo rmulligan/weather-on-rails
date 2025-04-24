@@ -254,6 +254,13 @@ GEM
     rubocop-ast (1.44.1)
       parser (>= 3.3.7.2)
       prism (~> 1.4)
+    rubocop-rspec (3.6.0)
+      lint_roller (~> 1.1)
+      rubocop (~> 1.72, >= 1.72.1)
+    rubocop-rspec_rails (2.31.0)
+      lint_roller (~> 1.1)
+      rubocop (~> 1.72, >= 1.72.1)
+      rubocop-rspec (~> 3.5)
     ruby-progressbar (1.13.0)
     securerandom (0.4.1)
     simplecov (0.22.0)
@@ -267,6 +274,14 @@ GEM
     spring-watcher-listen (2.0.1)
       listen (>= 2.7, < 4.0)
       spring (>= 1.2, < 3.0)
+    sprockets (4.2.2)
+      concurrent-ruby (~> 1.0)
+      logger
+      rack (>= 2.2.4, < 4)
+    sprockets-rails (3.5.2)
+      actionpack (>= 6.1)
+      activesupport (>= 6.1)
+      sprockets (>= 3.0.0)
     stringio (3.1.7)
     tailwindcss-rails (2.0.31-x86_64-linux)
       railties (>= 6.0.0)
@@ -314,10 +329,13 @@ DEPENDENCIES
   rails (~> 7.1.5, >= 7.1.5.1)
   rspec-rails
   rubocop
+  rubocop-rspec
+  rubocop-rspec_rails
   simplecov
   simplecov-lcov
   spring
   spring-watcher-listen (~> 2.0.0)
+  sprockets-rails
   tailwindcss-rails (~> 2.0)
   tzinfo-data
   vcr

@@ -3,8 +3,8 @@ version: '3.8'
 services:
   web:
     build: .
-    # Run migrations then start the Rails server
-    command: bash -c "bundle exec rails db:migrate && bundle exec rails server -b 0.0.0.0"
+    # Start the Rails server (no migrations required since ActiveRecord is disabled)
+    command: bundle exec rails server -b 0.0.0.0
     ports:
       - "3000:3000"
     environment:

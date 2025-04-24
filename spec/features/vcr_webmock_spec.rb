@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'httparty'
 
 RSpec.describe 'VCR and WebMock', type: :feature do

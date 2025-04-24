@@ -1,5 +1,5 @@
 # Dockerfile for WeatherOnRails
-FROM ruby:2.7.6-slim
+FROM ruby:3.2.2-slim
 
 # install dependencies
 RUN apt-get update -qq \
@@ -21,8 +21,8 @@ RUN bundle config set --local without 'development test' \
 # copy application code
 COPY . .
 
-# prepare database and precompile assets
-RUN bundle exec rails db:prepare
+# precompile assets (no database setup needed since ActiveRecord is disabled)
+# RUN bundle exec rails db:prepare
 
 # expose port
 EXPOSE 3000

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe WeatherFetcher, type: :service do
@@ -13,7 +15,7 @@ RSpec.describe WeatherFetcher, type: :service do
       expect(result[:current][:low]).to be_a(Numeric)
       expect(result[:forecast]).to be_an(Array)
       expect(result[:forecast].size).to be >= 1
-      expect(result[:provider]).to be_in(['OpenWeatherMap', 'VisualCrossing'])
+      expect(result[:provider]).to be_in(%w[OpenWeatherMap VisualCrossing])
     end
   end
 
@@ -25,7 +27,7 @@ RSpec.describe WeatherFetcher, type: :service do
       expect(result[:current][:low]).to be_a(Numeric)
       expect(result[:forecast]).to be_an(Array)
       expect(result[:forecast].size).to be >= 1
-      expect(result[:provider]).to be_in(['OpenWeatherMap', 'VisualCrossing'])
+      expect(result[:provider]).to be_in(%w[OpenWeatherMap VisualCrossing])
     end
   end
 
@@ -35,7 +37,7 @@ RSpec.describe WeatherFetcher, type: :service do
       expect(result[:error]).to be_present
     end
   end
-  
+
   context 'in test environment stubs', without_http: true do
     before do
       # stub geocoding so test env stub branch can run

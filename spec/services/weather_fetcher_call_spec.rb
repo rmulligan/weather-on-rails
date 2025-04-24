@@ -1,10 +1,15 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe WeatherFetcher, type: :service do
   let(:zip) { '99999' }
   let(:addr) { 'Somewhere, XY' }
   let(:zip_data) { [1.1, 2.2, 'ZIP City, ZP, 99999'] }
-  let(:addr_geo) { double('geo', latitude: 3.3, longitude: 4.4, data: { 'address' => { 'city' => 'AddrCity', 'state' => 'AS', 'postcode' => '12345' } }) }
+  let(:addr_geo) do
+    double('geo', latitude: 3.3, longitude: 4.4,
+                  data: { 'address' => { 'city' => 'AddrCity', 'state' => 'AS', 'postcode' => '12345' } })
+  end
 
   before do
     # Simulate production environment for testing fetch_and_cache logic
@@ -80,7 +85,7 @@ RSpec.describe WeatherFetcher, type: :service do
       expect(res[:place_name]).to eq('AddrCity, AS, 12345')
     end
   end
-  
+
   context 'address branch falls back to VisualCrossing' do
     before do
       allow(Geocoder).to receive(:search).with(addr).and_return([addr_geo])
@@ -112,7 +117,7 @@ RSpec.describe WeatherFetcher, type: :service do
       expect(res[:lon]).to eq(4.4)
     end
   end
-  
+
   context 'invalid address branch error', without_http: true do
     before do
       allow(Rails.env).to receive(:test?).and_return(false)

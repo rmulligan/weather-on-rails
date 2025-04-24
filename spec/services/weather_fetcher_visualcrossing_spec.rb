@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe WeatherFetcher, type: :service do
@@ -20,7 +22,8 @@ RSpec.describe WeatherFetcher, type: :service do
         ]
       }
       resp = double('resp', success?: true, parsed_response: raw)
-      expect(HTTParty).to receive(:get).with(/#{Regexp.escape(WeatherFetcher::VISUALCROSSING_URL)}\/30\.0,-90\.0/, anything).and_return(resp)
+      expect(HTTParty).to receive(:get).with(%r{#{Regexp.escape(WeatherFetcher::VISUALCROSSING_URL)}/30\.0,-90\.0},
+                                             anything).and_return(resp)
       result = wf.send(:fetch_visualcrossing, coords)
       expect(result[:provider]).to eq('VisualCrossing')
       expect(result[:current][:temp]).to eq(30)

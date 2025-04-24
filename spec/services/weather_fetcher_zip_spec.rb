@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 require 'webmock/rspec'
 
@@ -31,7 +33,7 @@ RSpec.describe WeatherFetcher, '#fetch_us_zip', type: :service do
   end
 
   it 'returns nil for non-existent ZIP' do
-    stub_request(:get, "http://api.zippopotam.us/us/00000").to_return(status: 404)
+    stub_request(:get, 'http://api.zippopotam.us/us/00000').to_return(status: 404)
     expect(subject.send(:fetch_us_zip, '00000')).to be_nil
   end
 end
