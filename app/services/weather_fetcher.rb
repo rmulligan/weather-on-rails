@@ -132,8 +132,8 @@ class WeatherFetcher
     })
     return nil unless resp.success?
     parse_visualcrossing(resp.parsed_response)
-  rescue
-    nil
+  rescue HTTParty::Error, JSON::ParserError => e
+    Rails.logger.error("Error fetching data from Visual Crossing: #{e.message}")
   end
 
   def parse_openweathermap(data)
