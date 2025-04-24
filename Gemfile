@@ -7,10 +7,7 @@ ruby '3.2.2'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails', branch: 'main'
 gem 'rails', '~> 7.1.5', '>= 7.1.5.1'
-<<<<<<< HEAD
 gem 'sprockets-rails'
-=======
->>>>>>> f7e5a6c (security: upgrade to Rails 7.1.5.1 to maintain support)
 # Use sqlite3 as the database for Active Record
 # gem 'sqlite3', '~> 1.4'  # removed: not using a SQL database
 # Use Puma as the app server (update to fix HTTP smuggling vulnerabilities)
