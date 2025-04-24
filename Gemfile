@@ -32,6 +32,11 @@ gem 'dalli'
 # Required for Dalli's mem_cache_store connection pooling
 gem 'connection_pool'
 
+# In-memory caching with Memcached
+gem 'dalli'
+# Required for Dalli's mem_cache_store connection pooling
+gem 'connection_pool'
+
 # Weather and geocoding
 gem 'geocoder'
 gem 'httparty'
