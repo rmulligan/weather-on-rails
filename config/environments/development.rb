@@ -12,21 +12,15 @@ Rails.application.configure do
   # Show full error reports.
   config.consider_all_requests_local = true
 
-  # Enable/disable caching. By default caching is disabled.
-  # Run rails dev:cache to toggle caching.
-  if Rails.root.join('tmp', 'caching-dev.txt').exist?
-    config.action_controller.perform_caching = true
-    config.action_controller.enable_fragment_cache_logging = true
-
-    config.cache_store = :memory_store
-    config.public_file_server.headers = {
-      'Cache-Control' => "public, max-age=#{2.days.to_i}"
-    }
-  else
-    config.action_controller.perform_caching = false
-
-    config.cache_store = :null_store
-  end
+  # Enable caching via Memcached (Dalli)
+  config.action_controller.perform_caching = true
+  config.action_controller.enable_fragment_cache_logging = true
+  config.cache_store = :mem_cache_store,
+    ENV.fetch('MEMCACHED_SERVERS', 'localhost:11211').split(','),
+    { namespace: 'weather', expires_in: 30.minutes, pool_size: ENV.fetch('RAILS_MAX_THREADS', 5).to_i }
+  config.public_file_server.headers = {
+    'Cache-Control' => "public, max-age=#{2.days.to_i}"
+  }
 
   # Don't care if the mailer can't send.
   config.action_mailer.raise_delivery_errors = false
