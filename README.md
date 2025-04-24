@@ -78,8 +78,7 @@ docker-compose up --build
 ```
 This will:
 - Mount your application code into the container for live reloading during development
-- Persist gem dependencies in a named Docker volume for faster rebuilds
-  - Automatically launch the Rails server
+- Persist gem dependencies in a named Docker volume for faster rebuilds. Automatically launch the Rails server
 Visit http://localhost:3000 once services are up.
 
 ## Configuration Settings

@@ -49,7 +49,7 @@ RSpec.describe WeatherFetcher, type: :service do
       result = WeatherFetcher.call('any')
       expect(result[:current][:temp]).to eq(0.0)
       expect(result[:forecast]).to be_an(Array)
-      expect(result[:provider]).to be_nil.or be_a(String)
+      expect(result[:provider]).to eq('OpenWeatherMap')
       expect([true, false]).to include(result[:cached])
     end
   end

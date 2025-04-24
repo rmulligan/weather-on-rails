@@ -35,7 +35,8 @@ class WeatherFetcher
     state = place['state abbreviation']
     place_name = [city, state, zip].join(', ')
     [lat, lon, place_name]
-  rescue StandardError
+  rescue => e
+    Rails.logger.error("Error fetching ZIP code #{zip}: #{e.message}")
     nil
   end
 
@@ -143,8 +144,8 @@ class WeatherFetcher
     return nil unless resp.success?
 
     parse_visualcrossing(resp.parsed_response)
-  rescue StandardError
-    nil
+  rescue HTTParty::Error, JSON::ParserError => e
+    Rails.logger.error("Error fetching data from Visual Crossing: #{e.message}")
   end
 
   def parse_openweathermap(data)
