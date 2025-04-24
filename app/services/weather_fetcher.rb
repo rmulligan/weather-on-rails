@@ -32,7 +32,8 @@ class WeatherFetcher
     state = place['state abbreviation']
     place_name = [city, state, zip].join(', ')
     [lat, lon, place_name]
-  rescue
+  rescue => e
+    Rails.logger.error("Error fetching ZIP code #{zip}: #{e.message}")
     nil
   end
 
