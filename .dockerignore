@@ -1,0 +1,12 @@
+/.git
+/log
+/tmp
+/db/*.sqlite3
+/coverage
+/vendor/bundle
+/*.log
+*.lock
+!Gemfile.lock
+node_modules
+public/packs
+public/assets

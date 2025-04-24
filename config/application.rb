@@ -1,18 +1,24 @@
+# frozen_string_literal: true
+
 require_relative 'boot'
 
-require "rails"
+require 'rails'
 # Pick the frameworks you want:
-require "active_model/railtie"
-require "active_job/railtie"
-require "active_record/railtie"
+require 'active_model/railtie'
+require 'active_job/railtie'
+# require "active_record/railtie"  # disabled: not using Active Record
 # require "active_storage/engine"
-require "action_controller/railtie"
-require "action_mailer/railtie"
+require 'action_controller/railtie'
+require 'action_mailer/railtie'
 # require "action_mailbox/engine"
 # require "action_text/engine"
-require "action_view/railtie"
+require 'action_view/railtie'
 # require "action_cable/engine"
-require "sprockets/railtie"  # enable asset pipeline for TailwindCSS
+begin
+  require 'sprockets/railtie' # enable asset pipeline for TailwindCSS
+rescue LoadError
+  # sprockets-rails not available, skip asset pipeline
+end
 
 # require "rails/test_unit/railtie"
 

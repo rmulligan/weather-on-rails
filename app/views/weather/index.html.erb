@@ -1,41 +1,96 @@
-<h1 class="text-3xl font-bold mb-6">Weather Lookup</h1>
+<h1 class="text-3xl font-bold mb-6"><%= page_name %></h1>
 
 <%= form_with url: weather_path, method: :get, local: true, class: "mb-8 flex flex-col md:flex-row gap-4 items-center" do |form| %>
   <div class="flex flex-col md:flex-row gap-2 items-center w-full md:w-auto">
     <%= form.label :location, 'Enter US address or ZIP code:', class: "font-semibold" %>
-    <%= form.text_field :location, value: params[:location], class: "border rounded px-2 py-1 w-64" %>
-    <%= form.submit 'Get Weather', class: "bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition" %>
+    <%= form.text_field :location, value: params[:location], class: "border rounded px-2 py-1 w-64 focus:ring-indigo-300 focus:border-indigo-300" %>
+    <%= form.submit 'Get Weather', class: "bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition" %>
   </div>
 <% end %>
 
 <% if @location.present? %>
   <% if @weather && @weather[:error].blank? %>
-    <div class="bg-white rounded shadow p-6 mb-6">
-      <h2 class="text-xl font-semibold mb-2">Weather for <%= @location %></h2>
-      <p><strong>Provider:</strong> <%= @weather[:provider] %></p>
-      <p><strong>Current Temp:</strong> <%= @weather[:current][:temp] %> °F</p>
-      <p><strong>High:</strong> <%= @weather[:current][:high] %> °F</p>
-      <p><strong>Low:</strong> <%= @weather[:current][:low] %> °F</p>
-      <p><strong>Summary:</strong> <%= @weather[:current][:summary] %></p>
-      <h3 class="mt-4 font-semibold">Forecast</h3>
-      <ul class="list-disc ml-6">
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+      <h2 class="text-xl font-semibold mb-2">
+        Weather for <%= @weather[:place_name].presence || @location %>
+      </h2>
+      <div class="mb-2 space-y-1">
+        <span id="weather-fetched-at" class="inline-block bg-indigo-100 text-indigo-800 px-2 py-1 rounded text-sm" data-timestamp="<%= @weather[:fetched_at].utc.iso8601 %>"></span>
+        <% if @weather[:cached] %>
+          <span id="weather-expires-at" class="inline-block bg-amber-100 text-amber-800 px-2 py-1 rounded text-sm" data-expiration="<%= (@weather[:fetched_at] + 30.minutes).utc.iso8601 %>"></span>
+        <% else %>
+          <span class="inline-block bg-green-100 text-green-800 px-2 py-1 rounded text-sm">Live data</span>
+        <% end %>
+      </div>
+      <!-- Current Conditions Card -->
+      <div class="bg-gray-50 rounded-lg shadow-sm p-6 mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
+        <div class="flex items-center">
+          <div class="text-6xl font-bold text-gray-900"><%= @weather[:current][:temp].round %>°F</div>
+          <div class="ml-4">
+            <div class="text-xl font-semibold text-gray-700 capitalize"><%= @weather[:current][:summary] %></div>
+            <div class="mt-1 text-sm text-gray-600">H: <%= @weather[:current][:high].round %>°  L: <%= @weather[:current][:low].round %>°</div>
+          </div>
+        </div>
+        <div class="mt-4 md:mt-0">
+          <span class="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">Powered by <%= @weather[:provider] %></span>
+        </div>
+      </div>
+      <h3 class="mt-4 font-semibold">3-Day Forecast</h3>
+      <ul class="flex flex-col md:flex-row md:space-x-4 mt-2">
         <% @weather[:forecast].each do |day| %>
-          <li>
-            <%= day[:date] %>: High <%= day[:high] %> °F, Low <%= day[:low] %> °F, <%= day[:summary] %>
+          <li class="flex-1 bg-gray-50 rounded-lg p-4 mb-2 md:mb-0 text-center">
+            <div class="text-sm font-medium text-gray-700">
+              <%= "#{day[:date].strftime('%A, %B')} #{day[:date].day.ordinalize}" %>
+            </div>
+            <div class="mt-2">
+              <span class="text-lg font-semibold text-gray-900">H: <%= day[:high].round %>°</span>
+              <span class="ml-2 text-lg text-gray-500">L: <%= day[:low].round %>°</span>
+            </div>
+            <% if day[:summary].present? %>
+              <div class="mt-1 text-sm text-gray-600 capitalize"><%= day[:summary] %></div>
+            <% end %>
           </li>
         <% end %>
       </ul>
       <%# Map rendering %>
       <% if @weather[:lat] && @weather[:lon] %>
-        <div id="weather-map" class="mt-6 rounded shadow" style="height: 300px;"></div>
+        <div id="weather-map" class="mt-6 rounded-lg overflow-hidden shadow-lg w-full h-64 md:h-96"></div>
         <script>
           document.addEventListener('DOMContentLoaded', function() {
+            // Initialize map
             var map = L.map('weather-map').setView([<%= @weather[:lat] %>, <%= @weather[:lon] %>], 11);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
               maxZoom: 19,
               attribution: '© OpenStreetMap contributors'
             }).addTo(map);
+            // Add marker for searched location
             L.marker([<%= @weather[:lat] %>, <%= @weather[:lon] %>]).addTo(map);
+            // Overlay weather layer (precipitation)
+            L.tileLayer(
+              'https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=<%= Rails.application.credentials.openweathermap_api_key || ENV['OPENWEATHERMAP_API_KEY'] %>',
+              {
+                attribution: '&copy; <a href="https://openweathermap.org/">OpenWeatherMap</a>',
+                opacity: 0.5
+              }
+            ).addTo(map);
+            // Format fetched time in user's locale/timezone
+            var timeEl = document.getElementById('weather-fetched-at');
+            if (timeEl) {
+              var ts = timeEl.dataset.timestamp;
+              var dt = new Date(ts);
+              var timeStr = dt.toLocaleTimeString(undefined, { hour: 'numeric', minute: 'numeric' });
+              var dateStr = dt.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+              timeEl.textContent = 'Data retrieved at: ' + timeStr + ' on ' + dateStr;
+            }
+            // Format expiration time for cached freshness
+            var expEl = document.getElementById('weather-expires-at');
+            if (expEl) {
+              var ets = expEl.dataset.expiration;
+              var edt = new Date(ets);
+              var expTimeStr = edt.toLocaleTimeString(undefined, { hour: 'numeric', minute: 'numeric' });
+              var expDateStr = edt.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+              expEl.textContent = 'Refresh after: ' + expTimeStr + ' on ' + expDateStr;
+            }
           });
         </script>
       <% end %>
