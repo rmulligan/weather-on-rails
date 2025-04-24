@@ -58,24 +58,28 @@ GEM
       zeitwerk (~> 2.2, >= 2.2.2)
     addressable (2.8.7)
       public_suffix (>= 2.0.2, < 7.0)
+    ast (2.4.3)
     base64 (0.2.0)
     bigdecimal (3.1.9)
     bindex (0.8.1)
     bootsnap (1.18.4)
       msgpack (~> 1.2)
+    breakman (1.0.0)
     builder (3.3.0)
-    bundler-audit (0.9.2)
-      bundler (>= 1.2.0, < 3)
-      thor (~> 1.0)
     byebug (11.1.3)
+    codeclimate-test-reporter (1.0.7)
+      simplecov
     concurrent-ruby (1.3.5)
+    connection_pool (2.5.2)
     crack (1.0.0)
       bigdecimal
       rexml
     crass (1.0.6)
     csv (3.3.4)
+    dalli (3.2.8)
     date (3.4.1)
     diff-lcs (1.6.1)
+    docile (1.4.1)
     erubi (1.13.1)
     ffi (1.17.2)
     geocoder (1.8.5)
@@ -93,6 +97,9 @@ GEM
     jbuilder (2.13.0)
       actionview (>= 5.0.0)
       activesupport (>= 5.0.0)
+    json (2.11.0)
+    language_server-protocol (3.17.0.4)
+    lint_roller (1.1.0)
     listen (3.9.0)
       rb-fsevent (~> 0.10, >= 0.10.3)
       rb-inotify (~> 0.9, >= 0.9.10)
@@ -124,6 +131,11 @@ GEM
     nio4r (2.7.4)
     nokogiri (1.15.7-x86_64-linux)
       racc (~> 1.4)
+    parallel (1.27.0)
+    parser (3.3.8.0)
+      ast (~> 2.4.1)
+      racc
+    prism (1.4.0)
     public_suffix (5.1.1)
     puma (4.3.12)
       nio4r (~> 2.0)
@@ -159,10 +171,12 @@ GEM
       method_source
       rake (>= 0.8.7)
       thor (>= 0.20.3, < 2.0)
+    rainbow (3.1.1)
     rake (13.2.1)
     rb-fsevent (0.11.2)
     rb-inotify (0.11.1)
       ffi (~> 1.0)
+    regexp_parser (2.10.0)
     rexml (3.4.1)
     rspec-core (3.13.3)
       rspec-support (~> 3.13.0)
@@ -181,6 +195,28 @@ GEM
       rspec-mocks (~> 3.10)
       rspec-support (~> 3.10)
     rspec-support (3.13.2)
+    rubocop (1.75.3)
+      json (~> 2.3)
+      language_server-protocol (~> 3.17.0.2)
+      lint_roller (~> 1.1.0)
+      parallel (~> 1.10)
+      parser (>= 3.3.0.2)
+      rainbow (>= 2.2.2, < 4.0)
+      regexp_parser (>= 2.9.3, < 3.0)
+      rubocop-ast (>= 1.44.0, < 2.0)
+      ruby-progressbar (~> 1.7)
+      unicode-display_width (>= 2.4.0, < 4.0)
+    rubocop-ast (1.44.1)
+      parser (>= 3.3.7.2)
+      prism (~> 1.4)
+    ruby-progressbar (1.13.0)
+    simplecov (0.22.0)
+      docile (~> 1.1)
+      simplecov-html (~> 0.11)
+      simplecov_json_formatter (~> 0.1)
+    simplecov-html (0.13.1)
+    simplecov-lcov (0.8.0)
+    simplecov_json_formatter (0.1.4)
     spring (2.1.1)
     spring-watcher-listen (2.0.1)
       listen (>= 2.7, < 4.0)
@@ -202,6 +238,9 @@ GEM
     timeout (0.4.3)
     tzinfo (1.2.11)
       thread_safe (~> 0.1)
+    unicode-display_width (3.1.4)
+      unicode-emoji (~> 4.0, >= 4.0.4)
+    unicode-emoji (4.0.4)
     vcr (6.3.1)
       base64
     web-console (4.2.1)
@@ -225,8 +264,11 @@ PLATFORMS
 
 DEPENDENCIES
   bootsnap (>= 1.4.2)
-  bundler-audit
+  breakman
   byebug
+  codeclimate-test-reporter (~> 1.0.0)
+  connection_pool
+  dalli
   geocoder
   httparty
   jbuilder (~> 2.7)
@@ -234,6 +276,9 @@ DEPENDENCIES
   puma (~> 4.1)
   rails (~> 6.0.6, >= 6.0.6.1)
   rspec-rails
+  rubocop
+  simplecov
+  simplecov-lcov
   spring
   spring-watcher-listen (~> 2.0.0)
   sqlite3 (~> 1.4)

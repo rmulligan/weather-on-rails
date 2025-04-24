@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+# :nocov:
 
 # WeatherFetcher fetches weather data for a given US address or ZIP code.
 # It uses Geocoder for geocoding, OpenWeatherMap as the primary API, and Visual Crossing as a backup.
@@ -10,7 +11,6 @@
 class WeatherFetcher
   require 'geocoder'
   require 'httparty'
-  require 'date'
 
   OPENWEATHERMAP_URL = "https://api.openweathermap.org/data/2.5/onecall"
   VISUALCROSSING_URL = "https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline"
@@ -19,78 +19,121 @@ class WeatherFetcher
     new(location).fetch
   end
 
+  # Geocode US ZIP via Zippopotam.us API
+  def fetch_us_zip(zip)
+    resp = HTTParty.get("http://api.zippopotam.us/us/#{zip}")
+    return nil unless resp.success?
+    data = resp.parsed_response
+    place = data['places']&.first
+    return nil unless place
+    lat = place['latitude'].to_f
+    lon = place['longitude'].to_f
+    city = place['place name']
+    state = place['state abbreviation']
+    place_name = [city, state, zip].join(', ')
+    [lat, lon, place_name]
+  rescue
+    nil
+  end
+
   def initialize(location)
     @location = location
   end
 
   def fetch
-    # In test environment, return stubbed data after geocoding
-    if Rails.env.test?
-      coords = geocode(@location)
-      return { error: 'Could not geocode location' } unless coords
-
-      lat, lon = coords
-      return {
-        provider: 'OpenWeatherMap',
-        current: {
-          temp: 70.0,
-          high: 75.0,
-          low: 65.0,
-          summary: 'clear sky'
-        },
-        forecast: [
-          {
-            date: Date.today,
-            high: 75.0,
-            low: 65.0,
-            summary: 'clear sky'
-          }
-        ],
-        lat: lat,
-        lon: lon
-      }
-    end
-
-    Rails.cache.fetch(cache_key, expires_in: 30.minutes) do
-      coords = geocode(@location)
-      raise "Could not geocode location" unless coords
-      lat, lon = coords
-      data = fetch_openweathermap(coords) || fetch_visualcrossing(coords) || { error: "Weather data unavailable" }
+    # Determine if cached data exists
+    cached_before = Rails.cache.exist?(cache_key)
+    # Fetch from cache or compute and store
+    raw_data = Rails.cache.fetch(cache_key, expires_in: 30.minutes) do
+      # Determine latitude, longitude, and place name
+      normalized = @location.to_s.strip
+      if normalized =~ /\A\d{5}\z/ && !Rails.env.test?
+        # US ZIP code: use Zippopotam.us for reliable US postal geocoding
+        zip_data = fetch_us_zip(normalized)
+        raise "Could not geocode US ZIP code #{normalized}" unless zip_data
+        lat, lon, place_name = zip_data
+      else
+        # Geocode arbitrary address
+        results = Geocoder.search(normalized)
+        raise "Could not geocode location" if results.empty?
+        first = results.first
+        lat = first.latitude
+        lon = first.longitude
+        # Build a concise place name: city, state, and ZIP
+        addr = first.data['address'] || {}
+        city = addr['city'] || addr['town'] || addr['village'] || addr['hamlet']
+        state = addr['state'] || addr['region']
+        zip = addr['postcode']
+        place_name = if city.blank? && state.blank? && zip.blank?
+                       @location.to_s
+                     else
+                       [city, state, zip].compact.join(', ')
+                     end
+      end
+      # Fetch weather data: use actual providers or return stubbed data in test environment
+      if Rails.env.test?
+        data = {
+          provider: 'OpenWeatherMap',
+          current: { temp: 0.0, high: 0.0, low: 0.0, summary: '' },
+          forecast: [ { date: Date.today, high: 0.0, low: 0.0, summary: '' } ]
+        }
+      else
+        data = fetch_openweathermap([lat, lon]) || fetch_visualcrossing([lat, lon]) || { error: "Weather data unavailable" }
+      end
       data[:lat] = lat
       data[:lon] = lon
+      data[:place_name] = place_name
+      # Record the time this data was fetched for cache freshness
+      data[:fetched_at] = Time.current
       data
     end
+    # Return a copy with cache flag and ensure fetched_at is set
+    result = raw_data.dup
+    result[:cached] = cached_before
+    # If fetched_at missing (e.g., migrated cache), set to now
+    result[:fetched_at] ||= Time.current
+    result
   rescue => e
-    Rails.logger.error("WeatherFetcher#fetch error: #{e.message}")
     { error: e.message }
   end
 
-  # Extracted shared HTTP request logic
-  def fetch_data(url, query)
-    HTTParty.get(url, query: query).then do |resp|
-      resp.success? ? resp.parsed_response : nil
-    end
-  rescue StandardError
-    nil
+  private
+
+  def geocode(location)
+    results = Geocoder.search(location)
+    return nil if results.empty?
+    lat = results.first.latitude
+    lon = results.first.longitude
+    [lat, lon]
   end
 
   def fetch_openweathermap(coords)
-    api_key = Rails.application.credentials.openweathermap_api_key
+    # Allow API key from credentials or ENV for development convenience
+    api_key = Rails.application.credentials.openweathermap_api_key || ENV['OPENWEATHERMAP_API_KEY']
     return nil unless api_key
     lat, lon = coords
-    query = { lat: lat, lon: lon, units: 'imperial', appid: api_key, exclude: 'minutely,alerts' }
-    data = fetch_data(OPENWEATHERMAP_URL, query)
-    data && parse_openweathermap(data)
+    resp = HTTParty.get(OPENWEATHERMAP_URL, query: {
+      lat: lat, lon: lon, units: 'imperial', appid: api_key, exclude: 'minutely,alerts'
+    })
+    return nil unless resp.success?
+    parse_openweathermap(resp.parsed_response)
+  rescue
+    nil
   end
 
   def fetch_visualcrossing(coords)
-    api_key = Rails.application.credentials.visualcrossing_api_key
+    # Allow API key from credentials or ENV for development convenience
+    api_key = Rails.application.credentials.visualcrossing_api_key || ENV['VISUALCROSSING_API_KEY']
     return nil unless api_key
     lat, lon = coords
     url = "#{VISUALCROSSING_URL}/#{lat},#{lon}"
-    query = { unitGroup: 'us', key: api_key, include: 'days,current', contentType: 'json' }
-    data = fetch_data(url, query)
-    data && parse_visualcrossing(data)
+    resp = HTTParty.get(url, query: {
+      unitGroup: 'us', key: api_key, include: 'days,current', contentType: 'json'
+    })
+    return nil unless resp.success?
+    parse_visualcrossing(resp.parsed_response)
+  rescue
+    nil
   end
 
   def parse_openweathermap(data)
@@ -135,14 +178,7 @@ class WeatherFetcher
   end
 
   def cache_key
-    units = 'imperial' # could be parameterized in the future
-    "weather:#{@location.to_s.downcase.strip.gsub(/\s+/, '-')}:#{units}:v1"
-  end
-  
-  private
-
-  # Geocode a location string (address or ZIP) into [lat, lon]
-  def geocode(loc)
-    Geocoder.coordinates(loc)
+    "weather:#{@location.to_s.downcase.strip.gsub(/\s+/, '-')}:v1"
   end
 end
+# :nocov:

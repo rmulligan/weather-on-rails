@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    # Run migrations then start the Rails server
+    command: bash -c "bundle exec rails db:migrate && bundle exec rails server -b 0.0.0.0"
+    ports:
+      - "3000:3000"
+    environment:
+      OPENWEATHERMAP_API_KEY: ${OPENWEATHERMAP_API_KEY}
+      VISUALCROSSING_API_KEY: ${VISUALCROSSING_API_KEY}
+    volumes:
+      - .:/app:cached
+      - bundle:/usr/local/bundle
+
+volumes:
+  bundle:
+    labels:
+      description: "Gem cache volume"

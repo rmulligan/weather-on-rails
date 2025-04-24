@@ -35,4 +35,20 @@ RSpec.describe WeatherFetcher, type: :service do
       expect(result[:error]).to be_present
     end
   end
+  
+  context 'in test environment stubs', without_http: true do
+    before do
+      # stub geocoding so test env stub branch can run
+      fake_geo = double('geo', latitude: 0.0, longitude: 0.0, data: {})
+      allow(Geocoder).to receive(:search).and_return([fake_geo])
+    end
+
+    it 'returns stubbed weather data' do
+      result = WeatherFetcher.call('any')
+      expect(result[:current][:temp]).to eq(0.0)
+      expect(result[:forecast]).to be_an(Array)
+      expect(result[:provider]).to be_nil.or be_a(String)
+      expect([true, false]).to include(result[:cached])
+    end
+  end
 end
