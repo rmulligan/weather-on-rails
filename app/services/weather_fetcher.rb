@@ -61,6 +61,7 @@ class WeatherFetcher
       data
     end
   rescue => e
+    Rails.logger.error("WeatherFetcher#fetch error: #{e.message}")
     { error: e.message }
   end
 
