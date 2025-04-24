@@ -64,7 +64,8 @@ GEM
     bindex (0.8.1)
     bootsnap (1.18.4)
       msgpack (~> 1.2)
-    breakman (1.0.0)
+    brakeman (7.0.2)
+      racc
     builder (3.3.0)
     byebug (11.1.3)
     codeclimate-test-reporter (1.0.7)
@@ -81,7 +82,7 @@ GEM
     diff-lcs (1.6.1)
     docile (1.4.1)
     erubi (1.13.1)
-    ffi (1.17.2)
+    ffi (1.17.2-x86_64-linux-gnu)
     geocoder (1.8.5)
       base64 (>= 0.1.0)
       csv (>= 3.0.0)
@@ -115,7 +116,6 @@ GEM
     marcel (1.0.4)
     method_source (1.1.0)
     mini_mime (1.1.5)
-    mini_portile2 (2.8.8)
     minitest (5.25.5)
     msgpack (1.8.0)
     multi_xml (0.6.0)
@@ -229,8 +229,6 @@ GEM
       actionpack (>= 5.2)
       activesupport (>= 5.2)
       sprockets (>= 3.0.0)
-    sqlite3 (1.7.3)
-      mini_portile2 (~> 2.8.0)
     tailwindcss-rails (2.0.31-x86_64-linux)
       railties (>= 6.0.0)
     thor (1.3.2)
@@ -264,7 +262,7 @@ PLATFORMS
 
 DEPENDENCIES
   bootsnap (>= 1.4.2)
-  breakman
+  brakeman
   byebug
   codeclimate-test-reporter (~> 1.0.0)
   connection_pool
@@ -281,7 +279,6 @@ DEPENDENCIES
   simplecov-lcov
   spring
   spring-watcher-listen (~> 2.0.0)
-  sqlite3 (~> 1.4)
   tailwindcss-rails (~> 2.0)
   tzinfo-data
   vcr
@@ -290,7 +287,7 @@ DEPENDENCIES
   yard
 
 RUBY VERSION
-   ruby 2.7.6p219
+   ruby 3.2.2p53
 
 BUNDLED WITH
    2.4.9
