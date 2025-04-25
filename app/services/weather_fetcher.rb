@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# rubocop:disable Metrics/ClassLength
+
 # :nocov:
 
 # :nocov:
@@ -115,7 +117,7 @@ class WeatherFetcher
       opts[:query] = query if query
     end
     resp = HTTParty.get(url, **options)
-    return resp.parsed_response if resp.success?
+    resp.parsed_response if resp.success?
   rescue StandardError => e
     name = context || url
     Rails.logger.error("Error fetching data from #{name}: #{e.message}")
@@ -201,4 +203,5 @@ class WeatherFetcher
     "weather:#{@location.to_s.downcase.strip.gsub(/\s+/, '-')}:v1"
   end
 end
+# rubocop:enable Metrics/ClassLength
 # :nocov:

@@ -66,8 +66,9 @@
             // Add marker for searched location
             L.marker([<%= @weather[:lat] %>, <%= @weather[:lon] %>]).addTo(map);
             // Overlay weather layer (precipitation)
+            // Precipitation overlay via server proxy (hides API key)
             L.tileLayer(
-              'https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=<%= Rails.application.credentials.openweathermap_api_key || ENV['OPENWEATHERMAP_API_KEY'] %>',
+              '/tiles/openweathermap/precipitation/{z}/{x}/{y}.png',
               {
                 attribution: '&copy; <a href="https://openweathermap.org/">OpenWeatherMap</a>',
                 opacity: 0.5
