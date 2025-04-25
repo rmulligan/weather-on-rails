@@ -24,10 +24,10 @@ class WeatherFetcher
 
   # Geocode US ZIP via Zippopotam.us API
   def fetch_us_zip(zip)
-    resp = HTTParty.get("http://api.zippopotam.us/us/#{zip}")
-    return nil unless resp.success?
+    url = "http://api.zippopotam.us/us/#{zip}"
+    data = request_json(url, context: "Zippopotam.us ZIP code #{zip}")
+    return nil unless data
 
-    data = resp.parsed_response
     place = data['places']&.first
     return nil unless place
 
@@ -37,9 +37,6 @@ class WeatherFetcher
     state = place['state abbreviation']
     place_name = [city, state, zip].join(', ')
     [lat, lon, place_name]
-  rescue => e
-    Rails.logger.error("Error fetching ZIP code #{zip}: #{e.message}")
-    nil
   end
 
   def initialize(location)
@@ -108,6 +105,22 @@ class WeatherFetcher
 
   private
 
+  # Perform an HTTP GET and parse JSON, logging errors
+  # url - request URL string
+  # query - optional HTTParty query params
+  # context - descriptive name for error logging
+  def request_json(url, query: nil, context: nil)
+    options = {}.tap do |opts|
+      opts[:query] = query if query
+    end
+    resp = HTTParty.get(url, **options)
+    return resp.parsed_response if resp.success?
+  rescue StandardError => e
+    name = context || url
+    Rails.logger.error("Error fetching data from #{name}: #{e.message}")
+    nil
+  end
+
   def geocode(location)
     results = Geocoder.search(location)
     return nil if results.empty?
@@ -118,36 +131,28 @@ class WeatherFetcher
   end
 
   def fetch_openweathermap(coords)
-    # Allow API key from credentials or ENV for development convenience
     api_key = Rails.application.credentials.openweathermap_api_key || ENV['OPENWEATHERMAP_API_KEY']
     return nil unless api_key
 
     lat, lon = coords
-    resp = HTTParty.get(OPENWEATHERMAP_URL, query: {
-                          lat: lat, lon: lon, units: 'imperial', appid: api_key, exclude: 'minutely,alerts'
-                        })
-    return nil unless resp.success?
+    params = { lat: lat, lon: lon, units: 'imperial', appid: api_key, exclude: 'minutely,alerts' }
+    data = request_json(OPENWEATHERMAP_URL, query: params, context: 'OpenWeatherMap')
+    return nil unless data
 
-    parse_openweathermap(resp.parsed_response)
-  rescue HTTParty::Error, JSON::ParserError => e
-    Rails.logger.error("Error fetching data from OpenWeatherMap: #{e.message}")
+    parse_openweathermap(data)
   end
 
   def fetch_visualcrossing(coords)
-    # Allow API key from credentials or ENV for development convenience
     api_key = Rails.application.credentials.visualcrossing_api_key || ENV['VISUALCROSSING_API_KEY']
     return nil unless api_key
 
     lat, lon = coords
     url = "#{VISUALCROSSING_URL}/#{lat},#{lon}"
-    resp = HTTParty.get(url, query: {
-                          unitGroup: 'us', key: api_key, include: 'days,current', contentType: 'json'
-                        })
-    return nil unless resp.success?
+    params = { unitGroup: 'us', key: api_key, include: 'days,current', contentType: 'json' }
+    data = request_json(url, query: params, context: 'Visual Crossing')
+    return nil unless data
 
-    parse_visualcrossing(resp.parsed_response)
-  rescue HTTParty::Error, JSON::ParserError => e
-    Rails.logger.error("Error fetching data from Visual Crossing: #{e.message}")
+    parse_visualcrossing(data)
   end
 
   def parse_openweathermap(data)
