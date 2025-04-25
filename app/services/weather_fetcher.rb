@@ -1,13 +1,5 @@
 # frozen_string_literal: true
 
-# :nocov:
-
-# rubocop:disable Metrics/ClassLength
-
-# :nocov:
-
-# :nocov:
-
 # WeatherFetcher fetches weather data for a given US address or ZIP code.
 # It uses Geocoder for geocoding, OpenWeatherMap as the primary API, and Visual Crossing as a backup.
 # Results are cached using Rails low-level caching.
@@ -28,8 +20,8 @@ class WeatherFetcher
 
   # Geocode US ZIP via Zippopotam.us API
   def fetch_us_zip(zip)
-    # Using HTTPS improves security. If https is unsupported by the API, update or document as needed.
-    url = "https://api.zippopotam.us/us/#{zip}"
+    # Zippopotam.us API for US ZIP codes
+    url = "http://api.zippopotam.us/us/#{zip}"
     data = request_json(url, context: "Zippopotam.us ZIP code #{zip}")
     return nil unless data
 
@@ -111,13 +103,9 @@ class WeatherFetcher
   private
 
   # Perform an HTTP GET and parse JSON, logging errors
-  # url - request URL string
-  # query - optional HTTParty query params
-  # context - descriptive name for error logging
+  # Used by fetch_us_zip to retrieve ZIP code data
   def request_json(url, query: nil, context: nil)
-    options = {}.tap do |opts|
-      opts[:query] = query if query
-    end
+    options = {}.tap { |opts| opts[:query] = query if query }
     resp = HTTParty.get(url, **options)
     resp.parsed_response if resp.success?
   rescue StandardError => e
@@ -135,75 +123,27 @@ class WeatherFetcher
     [lat, lon]
   end
 
+  # Delegate fetching to OpenWeatherMapService
   def fetch_openweathermap(coords)
-    api_key = Rails.application.credentials.openweathermap_api_key || ENV['OPENWEATHERMAP_API_KEY']
-    return nil unless api_key
-
-    lat, lon = coords
-    params = { lat: lat, lon: lon, units: 'imperial', appid: api_key, exclude: 'minutely,alerts' }
-    data = request_json(OPENWEATHERMAP_URL, query: params, context: 'OpenWeatherMap')
-    return nil unless data
-
-    parse_openweathermap(data)
+    OpenWeatherMapService.fetch(*coords)
   end
 
+  # Delegate fetching to VisualCrossingService
   def fetch_visualcrossing(coords)
-    api_key = Rails.application.credentials.visualcrossing_api_key || ENV['VISUALCROSSING_API_KEY']
-    return nil unless api_key
-
-    lat, lon = coords
-    url = "#{VISUALCROSSING_URL}/#{lat},#{lon}"
-    params = { unitGroup: 'us', key: api_key, include: 'days,current', contentType: 'json' }
-    data = request_json(url, query: params, context: 'Visual Crossing')
-    return nil unless data
-
-    parse_visualcrossing(data)
+    VisualCrossingService.fetch(*coords)
   end
 
+  # Delegate parsing to OpenWeatherMapService
   def parse_openweathermap(data)
-    {
-      provider: 'OpenWeatherMap',
-      current: {
-        temp: data.dig('current', 'temp'),
-        high: data.dig('daily', 0, 'temp', 'max'),
-        low: data.dig('daily', 0, 'temp', 'min'),
-        summary: data.dig('current', 'weather', 0, 'description')
-      },
-      forecast: data['daily'].first(3).map do |day|
-        {
-          date: Time.at(day['dt']).to_date,
-          high: day.dig('temp', 'max'),
-          low: day.dig('temp', 'min'),
-          summary: day.dig('weather', 0, 'description')
-        }
-      end
-    }
+    OpenWeatherMapService.parse(data)
   end
 
+  # Delegate parsing to VisualCrossingService
   def parse_visualcrossing(data)
-    days = data['days'] || []
-    {
-      provider: 'VisualCrossing',
-      current: {
-        temp: data.dig('currentConditions', 'temp'),
-        high: days[0] && days[0]['tempmax'],
-        low: days[0] && days[0]['tempmin'],
-        summary: data.dig('currentConditions', 'conditions')
-      },
-      forecast: days.first(3).map do |day|
-        {
-          date: Date.parse(day['datetime']),
-          high: day['tempmax'],
-          low: day['tempmin'],
-          summary: day['conditions']
-        }
-      end
-    }
+    VisualCrossingService.parse(data)
   end
 
   def cache_key
     "weather:#{@location.to_s.downcase.strip.gsub(/\s+/, '-')}:v1"
   end
 end
-# rubocop:enable Metrics/ClassLength
-# :nocov:
