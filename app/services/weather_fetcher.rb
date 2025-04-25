@@ -98,8 +98,8 @@ class WeatherFetcher
       data[:fetched_at] = Time.current
       data
     end
-    # Return a copy with cache flag and ensure fetched_at is set
-    result = raw_data.dup
+    # Return a deep copy with cache flag and ensure fetched_at is set
+    result = raw_data.deep_dup
     result[:cached] = cached_before
     # If fetched_at missing (e.g., migrated cache), set to now
     result[:fetched_at] ||= Time.current
