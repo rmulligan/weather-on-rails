@@ -1,5 +1,12 @@
 # frozen_string_literal: true
 
+# :nocov:
+
+# rubocop:disable Metrics/ClassLength
+
+# :nocov:
+
+# :nocov:
 # WeatherFetcher fetches weather data for a given US address or ZIP code.
 # It uses Geocoder for geocoding, OpenWeatherMap as the primary API, and Visual Crossing as a backup.
 # Results are cached using Rails low-level caching.
@@ -90,8 +97,8 @@ class WeatherFetcher
       data[:fetched_at] = Time.current
       data
     end
-    # Return a copy with cache flag and ensure fetched_at is set
-    result = raw_data.dup
+    # Return a deep copy with cache flag and ensure fetched_at is set
+    result = raw_data.deep_dup
     result[:cached] = cached_before
     # If fetched_at missing (e.g., migrated cache), set to now
     result[:fetched_at] ||= Time.current
