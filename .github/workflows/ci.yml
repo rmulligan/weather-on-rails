@@ -49,7 +49,8 @@ jobs:
           bundle install --jobs 4 --retry 3
 
       - name: Run tests and upload coverage to Code Climate
-        uses: paambaati/codeclimate-action@v3
+        # Pin to v2 due to a YAML syntax issue in the v3 tag of paambaati/codeclimate-action
+        uses: paambaati/codeclimate-action@v2
         with:
           coverageCommand: bundle exec rspec
         env:
