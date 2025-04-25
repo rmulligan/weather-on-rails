@@ -3,6 +3,8 @@
 
 # :nocov:
 
+# :nocov:
+
 # rubocop:disable Metrics/ClassLength
 
 # :nocov:
