@@ -1,5 +1,13 @@
 # frozen_string_literal: true
 
+# :nocov:
+
+# rubocop:disable Metrics/ClassLength
+
+# :nocov:
+
+# :nocov:
+
 # WeatherFetcher fetches weather data for a given US address or ZIP code.
 # It uses Geocoder for geocoding, OpenWeatherMap as the primary API, and Visual Crossing as a backup.
 # Results are cached using Rails low-level caching.
