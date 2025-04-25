@@ -15,7 +15,7 @@ WORKDIR /app
 
 # cache and install gems
 COPY Gemfile Gemfile.lock ./
-RUN bundle config set --local without 'development test' \
+RUN bundle config set --local without 'test' \
   && bundle install -j "$(nproc)"
 
 # copy application code

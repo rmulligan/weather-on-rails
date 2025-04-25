@@ -8,6 +8,8 @@ services:
     ports:
       - "3000:3000"
     environment:
+      # Ensure only the test group is skipped by Bundler, so development gems like 'listen' are available
+      BUNDLE_WITHOUT: "test"
       OPENWEATHERMAP_API_KEY: ${OPENWEATHERMAP_API_KEY}
       VISUALCROSSING_API_KEY: ${VISUALCROSSING_API_KEY}
     volumes:
