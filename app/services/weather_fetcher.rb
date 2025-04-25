@@ -24,7 +24,8 @@ class WeatherFetcher
 
   # Geocode US ZIP via Zippopotam.us API
   def fetch_us_zip(zip)
-    url = "http://api.zippopotam.us/us/#{zip}"
+    # Using HTTPS improves security. If https is unsupported by the API, update or document as needed.
+    url = "https://api.zippopotam.us/us/#{zip}"
     data = request_json(url, context: "Zippopotam.us ZIP code #{zip}")
     return nil unless data
 
