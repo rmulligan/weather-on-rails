@@ -94,6 +94,3 @@ bundle exec rspec
 Key specs:
   - `spec/services/weather_fetcher_cache_spec.rb` (cache indicator)
   - `spec/services/weather_fetcher_rate_limiting_spec.rb` (rate-limiting logic)
-
-## Contributing
-Pull requests welcome! Please include tests and update documentation as needed.
