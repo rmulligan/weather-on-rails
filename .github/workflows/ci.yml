@@ -30,3 +30,28 @@ jobs:
 
       - name: Run Brakeman
         run: brakeman --exit-on-warn
+  test:
+    name: Test and Code Coverage
+    needs: lint_and_security
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.2.2
+
+      - name: Install dependencies
+        run: |
+          gem install bundler
+          bundle install --jobs 4 --retry 3
+
+      - name: Run tests and upload coverage to Code Climate
+        # Pin to latest v2.x release due to a YAML syntax issue in the v3 tag of paambaati/codeclimate-action
+        uses: paambaati/codeclimate-action@v2.7.5
+        with:
+          coverageCommand: bundle exec rspec
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
